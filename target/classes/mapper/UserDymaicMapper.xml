@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjj.test.dao.UserDymaicDao">
+    <select id="find" resultType="com.hjj.test.po.User">
+        select * from user
+        <where>
+            <choose>
+                <when test="id != null">
+                    id = #{id}
+                </when>
+
+                <when test="username != null and username.trim() != ''">
+                    username = #{username}
+                </when>
+
+                <when test="password != null and password.trim() != ''">
+                    password = #{password}
+                </when>
+
+                <otherwise>
+                    limit 10
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <update id="update">
+        update user
+        <set>
+            <if test="id != null">
+                id = #{id}
+            </if>
+
+            <if test="username != null and username.trim() != ''">
+                ,username = #{username}
+            </if>
+
+            <if test="password != null and password.trim() != ''">
+                ,password = #{password}
+            </if>
+
+        </set>
+
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+        </where>
+    </update>
+
+
+    <select id="findByIdList" resultType="com.hjj.test.po.User">
+        select * from user
+        <where>
+            id in
+            <!--
+                collection: 指定要遍历的集合
+                        list类型的参数会特殊处理封装到map中   map的key就叫list
+                item: 将当前遍历出的元素赋值给指定的变量  map的话就是value
+                separator: 每个元素之间的分隔符
+                open: 遍历所有结果拼接一个开始的字符
+                close：遍历所有结果拼接一个结束的字符
+                index: 索引  如果是list   那就是索引下标
+                               如果是map  那就是key
+            -->
+            <foreach collection="idList" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+
+    <insert id="insertAll">
+        insert into user(username, password)
+        values
+        <foreach collection="userList" item="user" separator=",">
+            (#{user.username}, #{user.password})
+        </foreach>
+    </insert>
+
+    <insert id="insertAll2">
+        <foreach collection="userList" item="user">
+            insert into user(username, password)
+            values(#{user.username}, #{user.password});
+        </foreach>
+    </insert>
+
+    <select id="find2" resultType="com.hjj.test.po.User">
+        <if test="_databaseId == 'mysql'">
+            <include refid="selectUser">
+                <property name="pwd" value="password"/>
+            </include>
+            <if test="_parameter != null">
+                where id = 5
+            </if>
+        </if>
+
+        <if test="_databaseId == 'oracle'">
+            select * from user
+            <if test="_parameter != null">
+                where id = 9
+            </if>
+        </if>
+    </select>
+
+
+    <sql id="selectUser">
+        select id,username,${pwd} from user
+    </sql>
+</mapper>

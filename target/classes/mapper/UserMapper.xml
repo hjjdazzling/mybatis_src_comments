@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    namespace:名称空间   一般都是类的全路径
+    id:唯一标识  一般是方法名
+    resultType:返回值类型
+    #{id}  从传过来的参数中取出id值
+-->
+<mapper namespace="com.hjj.test.dao.UserDao">
+    <!--
+        eviction:缓存的回收策略
+        flushInterval:缓存刷新间隔  多长时间清空一次，默认不清空
+        readOnly:
+        size:
+        type:
+    -->
+    <select id="findById" resultType="com.hjj.test.po.User">
+        select * from user where id = #{abc}
+    </select>
+
+
+    <select id="findByUserNameAndPassword" resultType="com.hjj.test.po.User">
+        select * from user where username = #{username} and password = #{password}
+    </select>
+
+    <select id="findByIdAndName" resultType="com.hjj.test.po.User">
+        select * from user where id = #{id} and username = #{username}
+    </select>
+
+    <insert id="insertUser" parameterType="com.hjj.test.po.User" useGeneratedKeys="true" keyProperty="id">
+        insert into user(username, password)
+        values(#{username}, #{password})
+    </insert>
+
+
+    <update id="updateUser">
+        update user set username = #{username}, password = #{password}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from user where id = #{id}
+    </delete>
+
+    <select id="findByMap" resultType="com.hjj.test.po.User">
+        select * from user where id = #{id} and username = #{name}
+    </select>
+
+    <select id="find" resultType="com.hjj.test.po.User">
+        select * from user where id = #{id} and username = #{username} and password = #{password}
+    </select>
+
+
+    <select id="findByList" resultType="com.hjj.test.po.User">
+        select * from user where id = #{list[0]}
+    </select>
+
+
+    <select id="getByLikeName" resultType="com.hjj.test.po.User">
+        select * from user where username like #{username}
+    </select>
+
+    <select id="getUserByIdReturnMap" resultType="java.util.Map">
+        select * from user where id = #{id}
+    </select>
+
+    <select id="getUsersReturnMap" resultType="java.util.Map">
+        select * from user where username like #{username}
+    </select>
+
+    <select id="getUserById2" resultType="com.hjj.test.po.User">
+        select * from user where id = ${id}
+    </select>
+
+
+    <resultMap id="userAndDepartmentResultMap" type="com.hjj.test.po.User">
+        <id column="id" property="id"></id>
+        <result column="username" property="username"></result>
+        <result column="password" property="password"></result>
+        <result column="department_id" property="department.id"></result>
+        <result column="department_name" property="department.departmentName"></result>
+    </resultMap>
+
+    <select id="getUserAndDepartment" resultMap="userAndDepartmentResultMap3">
+        select u.id id , u.username username, u.password password, d.id department_id, d.department_name department_name
+        from user u,department d
+        where u.id = #{id} and u.department_id = d.id
+    </select>
+
+
+    <resultMap id="userAndDepartmentResultMap2" type="com.hjj.test.po.User">
+        <id column="id" property="id"></id>
+        <result column="username" property="username"></result>
+        <result column="password" property="password"></result>
+
+        <!-- property javaBean的属性名  javaType javaBean的类型 -->
+        <association property="department" javaType="com.hjj.test.po.Department">
+            <result column="department_id" property="id"></result>
+            <result column="department_name" property="departmentName"></result>
+        </association>
+    </resultMap>
+
+
+    <resultMap id="userAndDepartmentResultMap3" type="com.hjj.test.po.User">
+        <id column="id" property="id"></id>
+        <result column="username" property="username"></result>
+        <result column="password" property="password"></result>
+
+        <!-- property javaBean的属性名 -->
+        <association property="department" select="com.hjj.www.dao.DepartmentDao.getById" column="department_id">
+        </association>
+    </resultMap>
+
+    <select id="getByDepartmentId" resultType="com.hjj.test.po.User">
+        select * from user where department_id = #{department_id}
+    </select>
+</mapper>

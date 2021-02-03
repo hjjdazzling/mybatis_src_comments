@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjj.test.dao.DepartmentDao">
+    <select id="getById" resultType="com.hjj.test.po.Department">
+        select * from department where id = #{id}
+    </select>
+
+
+    <resultMap id="departmentResultMap" type="com.hjj.test.po.Department">
+        <id column="id" property="id"></id>
+        <result column="department_name" property="departmentName"></result>
+
+        <collection property="userList" ofType="com.hjj.test.po.User">
+            <id property="id" column="user_id"></id>
+            <result column="username" property="username"></result>
+            <result column="password" property="password"></result>
+        </collection>
+    </resultMap>
+
+    <select id="getById2" resultMap="departmentResultMap">
+        select department.id, department_name, user.id user_id, user.username, user.password
+        from department
+        left join user on department.id = user.department_id
+        where department.id = #{id}
+    </select>
+
+
+    <resultMap id="departmentResultMap2" type="com.hjj.test.po.Department">
+        <id column="id" property="id"></id>
+        <result column="department_name" property="departmentName"></result>
+
+        <collection property="userList" select="com.hjj.www.dao.UserDao.getByDepartmentId" column="{department_id=id}" fetchType="eager">
+        </collection>
+    </resultMap>
+
+
+    <select id="getByIdStep" resultMap="departmentResultMap2">
+        select * from department where id = #{id}
+    </select>
+</mapper>
