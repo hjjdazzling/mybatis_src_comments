@@ -702,6 +702,7 @@ public class Configuration {
     executorType = executorType == null ? defaultExecutorType : executorType;
     executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
     Executor executor;
+    //执行器的类型默认是simple  reuse代表可以复用的   batch代表批处理
     if (ExecutorType.BATCH == executorType) {
       executor = new BatchExecutor(this, transaction);
     } else if (ExecutorType.REUSE == executorType) {
@@ -709,9 +710,11 @@ public class Configuration {
     } else {
       executor = new SimpleExecutor(this, transaction);
     }
+    //是否开启二级缓存
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
+    //插件
     executor = (Executor) interceptorChain.pluginAll(executor);
     return executor;
   }

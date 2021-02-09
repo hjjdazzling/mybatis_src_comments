@@ -55,10 +55,14 @@ public class SimpleExecutor extends BaseExecutor {
 
   @Override
   public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
+    //使用原生的JDBC记性查询
     Statement stmt = null;
     try {
       Configuration configuration = ms.getConfiguration();
+      //创建StatementHandler(实际实现RoutingStatementHandler)  四大对象之一   可以创建出Statement
+      //里面还给Statement加上了interceptorChain插件
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
+      //创建Statement或者PreparedStatement对象
       stmt = prepareStatement(handler, ms.getStatementLog());
       return handler.query(stmt, resultHandler);
     } finally {
@@ -83,8 +87,11 @@ public class SimpleExecutor extends BaseExecutor {
 
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
+    //JdbcTransaction的dataSource对象 从数据源中获取连接对象
     Connection connection = getConnection(statementLog);
+    //创建Statement或者PrepareStatement对象
     stmt = handler.prepare(connection, transaction.getTimeout());
+    //将上面的对象设置到StatementHandler中
     handler.parameterize(stmt);
     return stmt;
   }
